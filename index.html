@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#0f1115" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Finanzen" />
+    <title>Finanzen – Einnahmen &amp; Ausgaben</title>
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" href="app-icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="app-icon-180.png" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="topbar__row">
+        <h1 class="topbar__title">Finanzen</h1>
+        <div class="controls">
+          <div class="segmented" id="scope-switch" role="group" aria-label="Bereich">
+            <button type="button" class="segmented__btn is-active" data-scope="ich">Nur ich</button>
+            <button type="button" class="segmented__btn" data-scope="partner">Partner</button>
+            <button type="button" class="segmented__btn" data-scope="haushalt">Haushalt</button>
+          </div>
+          <div class="segmented" id="period-switch" role="group" aria-label="Zeitraum">
+            <button type="button" class="segmented__btn is-active" data-period="month">Monat</button>
+            <button type="button" class="segmented__btn" data-period="year">Jahr</button>
+          </div>
+        </div>
+      </div>
+      <nav class="tabs" id="tabs" aria-label="Ansichten">
+        <button type="button" class="tab is-active" data-tab="overview">Überblick</button>
+        <button type="button" class="tab" data-tab="budget">Budget</button>
+        <button type="button" class="tab" data-tab="assets">Vermögen</button>
+        <button type="button" class="tab" data-tab="data">Einstellungen</button>
+      </nav>
+    </header>
+
+    <main class="view" id="view"></main>
+
+    <input type="file" id="import-file" accept="application/json" hidden />
+
+    <script src="seed.js"></script>
+    <script src="store.js"></script>
+    <script src="app.js"></script>
+    <script>
+      if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
+        navigator.serviceWorker.register("service-worker.js");
+      }
+    </script>
+  </body>
+</html>
