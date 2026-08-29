@@ -4,10 +4,10 @@
   --bg-input: #1d222b;
   --line: #272d38;
   --text: #e8ecf3;
-  --muted: #9aa4b5;
-  --accent: #4f8cff;
-  --pos: #3ecf8e;
-  --neg: #ff6b6b;
+  --muted: #c1cada;
+  --accent: #82afff;
+  --pos: #66e0a3;
+  --neg: #ffaaa5;
   --radius: 14px;
 }
 
@@ -20,6 +20,14 @@ body {
   background: var(--bg);
   color: var(--text);
   font: 15px/1.5 "Segoe UI", system-ui, sans-serif;
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+summary:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 3px;
 }
 
 /* Kopfbereich */
@@ -192,7 +200,7 @@ body {
 }
 
 .card--big {
-  grid-column: 1 / -1;
+  background: #192238;
   border-color: var(--accent);
 }
 
@@ -209,6 +217,37 @@ body {
 
 .card--big .card__value {
   font-size: 30px;
+}
+
+.card__detail {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.plan-strip {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--line);
+}
+
+.plan-strip span {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 11px 14px;
+  background: var(--bg-soft);
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.plan-strip strong {
+  color: var(--text);
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
 }
 
 .is-pos {
@@ -582,6 +621,56 @@ input[type="range"] {
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
 }
 
+.quick-entry {
+  width: min(520px, calc(100vw - 32px));
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--bg-soft);
+  color: var(--text);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.5);
+}
+
+.quick-entry::backdrop {
+  background: rgba(0, 0, 0, 0.62);
+}
+
+.quick-entry form {
+  padding: 18px;
+}
+
+.quick-entry__head,
+.quick-entry__actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.quick-entry__head {
+  margin-bottom: 16px;
+}
+
+.quick-entry__head h2 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.quick-entry__fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.quick-entry__wide {
+  grid-column: 1 / -1;
+}
+
+.quick-entry__actions {
+  justify-content: flex-end;
+  margin-top: 18px;
+}
+
 .icon-btn {
   width: 30px;
   height: 30px;
@@ -612,6 +701,18 @@ input[type="range"] {
 @media (max-width: 860px) {
   .app-menu {
     top: 112px;
+  }
+
+  .plan-strip {
+    grid-template-columns: 1fr;
+  }
+
+  .quick-entry__fields {
+    grid-template-columns: 1fr;
+  }
+
+  .quick-entry__wide {
+    grid-column: auto;
   }
 
   .entry-head {

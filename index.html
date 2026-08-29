@@ -49,6 +49,38 @@
 
     <input type="file" id="import-file" accept="application/json" hidden />
 
+    <dialog class="quick-entry" id="quick-entry-dialog" aria-labelledby="quick-entry-title">
+      <form method="dialog" id="quick-entry-form">
+        <header class="quick-entry__head">
+          <h2 id="quick-entry-title">Schnell erfassen</h2>
+          <button type="button" class="icon-btn" id="quick-entry-close" aria-label="Erfassung schließen" title="Schließen">×</button>
+        </header>
+        <div class="quick-entry__fields">
+          <label class="field"><span>Art</span>
+            <select class="input" id="quick-entry-type">
+              <option value="variabel">Ausgabe</option>
+              <option value="einnahme">Einnahme</option>
+              <option value="sparen">Sparen</option>
+            </select>
+          </label>
+          <label class="field"><span>Gruppe</span>
+            <select class="input" id="quick-entry-group"></select>
+          </label>
+          <label class="field quick-entry__wide"><span>Bezeichnung</span>
+            <input class="input" id="quick-entry-name" required autocomplete="off" placeholder="z. B. Supermarkt" />
+          </label>
+          <label class="field"><span>Betrag pro Monat</span>
+            <input class="input" id="quick-entry-amount" required inputmode="decimal" placeholder="0,00" />
+          </label>
+        </div>
+        <p class="hint" id="quick-entry-hint"></p>
+        <footer class="quick-entry__actions">
+          <button type="button" class="btn btn--ghost" id="quick-entry-cancel">Abbrechen</button>
+          <button type="submit" class="btn">Eintrag hinzufügen</button>
+        </footer>
+      </form>
+    </dialog>
+
     <script src="seed.js"></script>
     <script src="store.js"></script>
     <script src="app.js"></script>

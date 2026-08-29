@@ -135,13 +135,18 @@ function syncUiControls() {
 
 function renderOverview(calc) {
   const f = periodFactor();
+  const planned = calc.fixed + calc.variable + calc.savings;
   const cards = [
-    { label: "Einnahmen", value: calc.income * f, tone: "pos" },
-    { label: "Fixkosten", value: -calc.fixed * f, tone: "neg" },
-    { label: "Variable Kosten", value: -calc.variable * f, tone: "neg" },
-    { label: "Sparen", value: -calc.savings * f, tone: "neutral" },
-    { label: "Vor variablen Kosten", value: calc.beforeVariable * f, tone: tone(calc.beforeVariable) },
-    { label: "Ergebnis", value: calc.result * f, tone: tone(calc.result), big: true },
+    { label: "Einnahmen", detail: "monatlich verfügbar", value: calc.income * f, tone: "pos", prefix: "+" },
+    { label: "Geplant", detail: "Kosten und Sparen", value: planned * f, tone: "neg", prefix: "−" },
+    {
+      label: calc.result >= 0 ? "Verfügbar" : "Fehlbetrag",
+      detail: calc.result >= 0 ? "nach allen Planposten" : "Plan übersteigt Einnahmen",
+      value: Math.abs(calc.result * f),
+      tone: tone(calc.result),
+      prefix: calc.result >= 0 ? "+" : "−",
+      big: true,
+    },
   ];
 
   const expenseGroups = calc.groups
@@ -159,10 +164,17 @@ function renderOverview(calc) {
             (c) => `
           <div class="card${c.big ? " card--big" : ""}">
             <span class="card__label">${esc(c.label)}</span>
-            <span class="card__value is-${c.tone}">${fmt(c.value)}</span>
+            <span class="card__value is-${c.tone}">${c.prefix} ${fmt(c.value)}</span>
+            <span class="card__detail">${esc(c.detail)}</span>
           </div>`
           )
           .join("")}
+      </div>
+
+      <div class="plan-strip" aria-label="Geplante Monatsaufteilung">
+        <span>Fixkosten <strong>${fmt(calc.fixed * f)}</strong></span>
+        <span>Variabel <strong>${fmt(calc.variable * f)}</strong></span>
+        <span>Sparen <strong>${fmt(calc.savings * f)}</strong></span>
       </div>
 
       <div class="panel">
@@ -276,7 +288,7 @@ function renderGroup(g, f) {
           <input type="checkbox" data-field="active" ${row.entry.active ? "checked" : ""} />
         </label>
         <span class="entry__share">${fmt(row.value * f)}</span>
-        <button type="button" class="icon-btn" data-action="remove-entry" title="Eintrag löschen">✕</button>
+        <button type="button" class="icon-btn" data-action="remove-entry" aria-label="Eintrag ${esc(row.entry.name || "ohne Namen")} löschen" title="Eintrag löschen">✕</button>
         ${row.entry.note ? `<p class="entry__note">${esc(row.entry.note)}</p>` : ""}
         ${g.group.type === "einnahme" ? renderIncomeDetails(g.group.id, row.entry) : ""}
       </div>`
@@ -294,7 +306,7 @@ function renderGroup(g, f) {
         <div class="group__edit-row">
           <input class="input group__name" type="text" value="${esc(g.group.name)}"
                  data-field="group-name" aria-label="Gruppenname" />
-          <button type="button" class="icon-btn" data-action="remove-group" title="Gruppe löschen">✕</button>
+          <button type="button" class="icon-btn" data-action="remove-group" aria-label="Gruppe ${esc(g.group.name)} löschen" title="Gruppe löschen">✕</button>
         </div>
       <div class="entry-head">
         <span>Bezeichnung</span><span>€ / Monat</span><span>Aktiv</span><span>Anteil</span><span></span>
@@ -328,7 +340,7 @@ function renderIncomeDetails(groupId, entry) {
             <input class="input" type="text" inputmode="decimal"
                    value="${(Number(item.amount) || 0).toFixed(2).replace(".", ",")}" data-field="detail-amount"
                    aria-label="Aufschlüsselung Betrag" />
-            <button type="button" class="icon-btn" data-action="remove-detail" title="Posten löschen">✕</button>
+            <button type="button" class="icon-btn" data-action="remove-detail" aria-label="Aufschlüsselungsposten ${esc(item.name || "ohne Namen")} löschen" title="Posten löschen">✕</button>
           </div>`
         )
         .join("")}
@@ -349,7 +361,7 @@ function renderAssets(calc) {
         <input class="input entry__date" type="date" value="${esc(a.date)}"
                data-field="asset-date" aria-label="Stand" />
          ${ui.scope === "haushalt" ? `<span class="tag">${esc(ownerLabel(a.owner))}</span>` : ""}
-        <button type="button" class="icon-btn" data-action="remove-asset" title="Löschen">✕</button>
+        <button type="button" class="icon-btn" data-action="remove-asset" aria-label="Vermögensposition ${esc(a.name || "ohne Namen")} löschen" title="Löschen">✕</button>
       </div>`
     )
     .join("");
@@ -440,6 +452,11 @@ document.getElementById("tabs").addEventListener("click", (e) => {
 
 const menuToggleEl = document.getElementById("menu-toggle");
 const appMenuEl = document.getElementById("app-menu");
+const quickEntryDialogEl = document.getElementById("quick-entry-dialog");
+const quickEntryFormEl = document.getElementById("quick-entry-form");
+const quickEntryTypeEl = document.getElementById("quick-entry-type");
+const quickEntryGroupEl = document.getElementById("quick-entry-group");
+const quickEntryHintEl = document.getElementById("quick-entry-hint");
 
 menuToggleEl.addEventListener("click", () => {
   const isOpen = appMenuEl.hidden;
@@ -458,7 +475,7 @@ appMenuEl.addEventListener("click", (e) => {
     saveUiState();
     render();
   } else if (action === "quick-add") {
-    quickAddGroup();
+    openQuickEntry();
   } else if (action === "save") {
     Store.save();
     showStatus("Gespeichert");
@@ -469,27 +486,52 @@ appMenuEl.addEventListener("click", (e) => {
   }
 });
 
-function quickAddGroup() {
-  if (ui.demoMode) return;
+function openQuickEntry() {
   if (ui.scope === "haushalt") {
-    showStatus("Zum Hinzufügen zuerst Ich oder Partner wählen.");
+    showStatus("Zum Erfassen zuerst Ich oder Partner wählen.");
     return;
   }
-  const choices = Object.entries(GROUP_TYPES)
-    .map(([type, meta], index) => `${index + 1}: ${meta.label}`)
-    .join("\n");
-  const selection = Number(prompt(`Kategorie wählen:\n${choices}`, "2"));
-  const type = Object.keys(GROUP_TYPES)[selection - 1];
-  if (!type) return;
-  const name = prompt("Name der neuen Gruppe:", "Neue Gruppe");
-  if (!name?.trim()) return;
-  const group = Store.addGroup(type, ui.scope);
-  group.name = name.trim();
+  quickEntryFormEl.reset();
+  quickEntryTypeEl.value = "variabel";
+  refreshQuickEntryGroups();
+  quickEntryDialogEl.showModal();
+  document.getElementById("quick-entry-name").focus();
+}
+
+function refreshQuickEntryGroups() {
+  const type = quickEntryTypeEl.value;
+  const groups = Store.state.groups.filter((group) => group.owner === ui.scope && group.type === type);
+  quickEntryGroupEl.innerHTML = groups.length
+    ? groups.map((group) => `<option value="${group.id}">${esc(group.name)}</option>`).join("")
+    : `<option value="new">Neue Gruppe anlegen</option>`;
+  quickEntryHintEl.textContent = groups.length
+    ? "Der Eintrag wird der ausgewählten Gruppe zugeordnet."
+    : `Für ${GROUP_TYPES[type].label} gibt es noch keine Gruppe. Eine neue wird angelegt.`;
+}
+
+quickEntryTypeEl.addEventListener("change", refreshQuickEntryGroups);
+document.getElementById("quick-entry-close").addEventListener("click", () => quickEntryDialogEl.close());
+document.getElementById("quick-entry-cancel").addEventListener("click", () => quickEntryDialogEl.close());
+
+quickEntryFormEl.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const type = quickEntryTypeEl.value;
+  const name = document.getElementById("quick-entry-name").value.trim();
+  const amount = parseAmount(document.getElementById("quick-entry-amount").value);
+  if (!name || !amount) return;
+  let group = Store.group(quickEntryGroupEl.value);
+  if (!group) group = Store.addGroup(type, ui.scope);
+  const entry = Store.addEntry(group.id);
+  entry.name = name;
+  entry.amount = amount;
+  entry.active = true;
   Store.save();
+  quickEntryDialogEl.close();
   ui.tab = "budget";
   saveUiState();
   render();
-}
+  showStatus("Eintrag hinzugefügt");
+});
 
 function showStatus(message) {
   let status = document.getElementById("save-status");
