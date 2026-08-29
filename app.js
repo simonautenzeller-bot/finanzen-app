@@ -1,7 +1,41 @@
-const ui = { tab: "overview", scope: "ich", period: "month" };
+const UI_STORAGE_KEY = "finanzen-app:ui-v1";
+const ui = { tab: "overview", scope: "ich", period: "month", demoMode: false, ...loadUiState() };
+
+const DEMO_DATA = {
+  settings: { myName: "Alex", partnerName: "Jamie" },
+  groups: [
+    { id: "demo-income-a", type: "einnahme", name: "Einnahmen", owner: "ich", entries: [{ id: "demo-salary-a", name: "Gehalt", amount: 2850, owner: "ich", active: true }] },
+    { id: "demo-income-b", type: "einnahme", name: "Einnahmen", owner: "partner", entries: [{ id: "demo-salary-b", name: "Gehalt", amount: 2400, owner: "partner", active: true }] },
+    { id: "demo-living", type: "fix", name: "Wohnen", owner: "ich", entries: [{ id: "demo-rent", name: "Miete", amount: 980, owner: "ich", active: true }, { id: "demo-power", name: "Strom", amount: 62, owner: "ich", active: true }] },
+    { id: "demo-media", type: "fix", name: "Abonnements", owner: "partner", entries: [{ id: "demo-media-row", name: "Streaming", amount: 19.99, owner: "partner", active: true }] },
+    { id: "demo-life-a", type: "variabel", name: "Alltag", owner: "ich", entries: [{ id: "demo-grocery-a", name: "Einkäufe", amount: 360, owner: "ich", active: true }] },
+    { id: "demo-life-b", type: "variabel", name: "Alltag", owner: "partner", entries: [{ id: "demo-grocery-b", name: "Einkäufe", amount: 290, owner: "partner", active: true }] },
+    { id: "demo-save", type: "sparen", name: "Sparen", owner: "ich", entries: [{ id: "demo-save-row", name: "Rücklage", amount: 450, owner: "ich", active: true }] },
+  ],
+  assets: [
+    { id: "demo-asset-a", name: "Tagesgeld", value: 8500, date: "2026-08-01", owner: "ich" },
+    { id: "demo-asset-b", name: "Depot", value: 6200, date: "2026-08-01", owner: "partner" },
+  ],
+};
 
 const viewEl = document.getElementById("view");
 const importFileEl = document.getElementById("import-file");
+
+function loadUiState() {
+  try {
+    return JSON.parse(localStorage.getItem(UI_STORAGE_KEY)) || {};
+  } catch {
+    return {};
+  }
+}
+
+function saveUiState() {
+  localStorage.setItem(UI_STORAGE_KEY, JSON.stringify(ui));
+}
+
+function displayState() {
+  return ui.demoMode ? DEMO_DATA : Store.state;
+}
 
 const currency = new Intl.NumberFormat("de-DE", {
   style: "currency",
@@ -42,14 +76,14 @@ function periodLabel() {
 }
 
 function scopeLabel() {
-  const s = Store.state.settings;
+  const s = displayState().settings;
   if (ui.scope === "ich") return s.myName;
   if (ui.scope === "partner") return s.partnerName;
   return `Haushalt (${s.myName} + ${s.partnerName})`;
 }
 
 function ownerLabel(owner) {
-  const s = Store.state.settings;
+  const s = displayState().settings;
   if (owner === "ich") return s.myName;
   if (owner === "partner") return s.partnerName;
   return "Gemeinsam";
@@ -68,7 +102,9 @@ function ownerOptions(selected) {
 
 function render() {
   renderScopeLabels();
-  const calc = calculate(Store.state, ui.scope);
+  syncUiControls();
+  viewEl.classList.toggle("is-demo", ui.demoMode);
+  const calc = calculate(displayState(), ui.scope);
   if (ui.tab === "overview") viewEl.innerHTML = renderOverview(calc);
   else if (ui.tab === "budget") viewEl.innerHTML = renderBudget(calc);
   else if (ui.tab === "assets") viewEl.innerHTML = renderAssets(calc);
@@ -76,10 +112,25 @@ function render() {
 }
 
 function renderScopeLabels() {
-  const settings = Store.state.settings;
+  const settings = displayState().settings;
   document.querySelector('[data-scope="ich"]').textContent = settings.myName;
   document.querySelector('[data-scope="partner"]').textContent = settings.partnerName;
   document.querySelector('[data-scope="haushalt"]').textContent = "Haushalt";
+}
+
+function syncUiControls() {
+  document.querySelectorAll("[data-scope]").forEach((button) => {
+    button.classList.toggle("is-active", button.dataset.scope === ui.scope);
+  });
+  document.querySelectorAll("[data-period]").forEach((button) => {
+    button.classList.toggle("is-active", button.dataset.period === ui.period);
+  });
+  document.querySelectorAll("[data-tab]").forEach((button) => {
+    button.classList.toggle("is-active", button.dataset.tab === ui.tab);
+  });
+  document.querySelector('[data-menu-action="demo"]').textContent = ui.demoMode
+    ? "Demo-Modus beenden"
+    : "Demo-Modus aktivieren";
 }
 
 function renderOverview(calc) {
@@ -177,13 +228,13 @@ function renderBudget(calc) {
     );
     const total = groups.reduce((sum, g) => sum + g.total, 0);
     return `
-      <section class="type-section">
-        <header class="type-section__head">
+      <details class="type-section">
+        <summary class="type-section__head">
           <h2>${esc(meta.label)}</h2>
           <span class="type-section__total is-${meta.sign > 0 ? "pos" : "neg"}">${fmt(
             meta.sign * total * f
           )}</span>
-        </header>
+        </summary>
         <div class="group-grid">
           ${groups.map((g) => renderGroup(g, f)).join("")}
         </div>
@@ -194,7 +245,7 @@ function renderBudget(calc) {
                 + Gruppe in „${esc(meta.label)}“
               </button>`
         }
-      </section>`;
+          </details>`;
   });
 
   return `
@@ -233,20 +284,25 @@ function renderGroup(g, f) {
     .join("");
 
   return `
-    <article class="group" data-group="${g.group.id}">
-      <header class="group__head">
-        <input class="input group__name" type="text" value="${esc(g.group.name)}"
-               data-field="group-name" aria-label="Gruppenname" />
+    <details class="group" data-group="${g.group.id}">
+      <summary class="group__head">
+        <span class="group__title">${esc(g.group.name)}</span>
         ${ui.scope === "haushalt" ? `<span class="tag">${esc(ownerLabel(g.group.owner))}</span>` : ""}
         <span class="group__total">${fmt(g.total * f)}</span>
-        <button type="button" class="icon-btn" data-action="remove-group" title="Gruppe löschen">✕</button>
-      </header>
+      </summary>
+      <div class="group__content">
+        <div class="group__edit-row">
+          <input class="input group__name" type="text" value="${esc(g.group.name)}"
+                 data-field="group-name" aria-label="Gruppenname" />
+          <button type="button" class="icon-btn" data-action="remove-group" title="Gruppe löschen">✕</button>
+        </div>
       <div class="entry-head">
         <span>Bezeichnung</span><span>€ / Monat</span><span>Aktiv</span><span>Anteil</span><span></span>
       </div>
       ${rows || `<p class="empty">Noch keine Einträge.</p>`}
       <button type="button" class="btn btn--ghost btn--sm" data-action="add-entry">+ Eintrag</button>
-    </article>`;
+      </div>
+    </details>`;
 }
 
 function renderIncomeDetails(groupId, entry) {
@@ -281,7 +337,7 @@ function renderIncomeDetails(groupId, entry) {
 }
 
 function renderAssets(calc) {
-  const rows = Store.state.assets
+  const rows = displayState().assets
     .filter((asset) => ui.scope === "haushalt" || asset.owner === ui.scope)
     .map(
       (a) => `
@@ -341,6 +397,7 @@ function renderData() {
       <div class="panel">
         <h2 class="panel__title">Daten</h2>
         <div class="btn-row">
+          <button type="button" class="btn" data-action="save">Jetzt speichern</button>
           <button type="button" class="btn" data-action="export">Als JSON sichern</button>
           <button type="button" class="btn" data-action="import">JSON laden</button>
           <button type="button" class="btn btn--danger" data-action="reset">Auf Excel-Stand zurücksetzen</button>
@@ -348,6 +405,7 @@ function renderData() {
         <p class="hint">Alles wird lokal im Browser gespeichert (localStorage). Für Backups die
           JSON-Datei sichern.</p>
       </div>
+          ${ui.demoMode ? `<div class="demo-banner">Demo-Modus ist aktiv. Es werden ausschließlich Beispieldaten angezeigt und keine echten Beträge.</div>` : ""}
     </div>`;
 }
 
@@ -358,6 +416,7 @@ document.getElementById("scope-switch").addEventListener("click", (e) => {
   if (!btn) return;
   ui.scope = btn.dataset.scope;
   setActive("#scope-switch", btn);
+  saveUiState();
   render();
 });
 
@@ -366,6 +425,7 @@ document.getElementById("period-switch").addEventListener("click", (e) => {
   if (!btn) return;
   ui.period = btn.dataset.period;
   setActive("#period-switch", btn);
+  saveUiState();
   render();
 });
 
@@ -374,8 +434,75 @@ document.getElementById("tabs").addEventListener("click", (e) => {
   if (!btn) return;
   ui.tab = btn.dataset.tab;
   setActive("#tabs", btn);
+  saveUiState();
   render();
 });
+
+const menuToggleEl = document.getElementById("menu-toggle");
+const appMenuEl = document.getElementById("app-menu");
+
+menuToggleEl.addEventListener("click", () => {
+  const isOpen = appMenuEl.hidden;
+  appMenuEl.hidden = !isOpen;
+  menuToggleEl.setAttribute("aria-expanded", String(isOpen));
+});
+
+appMenuEl.addEventListener("click", (e) => {
+  const action = e.target.dataset.menuAction;
+  if (!action) return;
+  appMenuEl.hidden = true;
+  menuToggleEl.setAttribute("aria-expanded", "false");
+
+  if (action === "settings") {
+    ui.tab = "data";
+    saveUiState();
+    render();
+  } else if (action === "quick-add") {
+    quickAddGroup();
+  } else if (action === "save") {
+    Store.save();
+    showStatus("Gespeichert");
+  } else if (action === "demo") {
+    ui.demoMode = !ui.demoMode;
+    saveUiState();
+    render();
+  }
+});
+
+function quickAddGroup() {
+  if (ui.demoMode) return;
+  if (ui.scope === "haushalt") {
+    showStatus("Zum Hinzufügen zuerst Ich oder Partner wählen.");
+    return;
+  }
+  const choices = Object.entries(GROUP_TYPES)
+    .map(([type, meta], index) => `${index + 1}: ${meta.label}`)
+    .join("\n");
+  const selection = Number(prompt(`Kategorie wählen:\n${choices}`, "2"));
+  const type = Object.keys(GROUP_TYPES)[selection - 1];
+  if (!type) return;
+  const name = prompt("Name der neuen Gruppe:", "Neue Gruppe");
+  if (!name?.trim()) return;
+  const group = Store.addGroup(type, ui.scope);
+  group.name = name.trim();
+  Store.save();
+  ui.tab = "budget";
+  saveUiState();
+  render();
+}
+
+function showStatus(message) {
+  let status = document.getElementById("save-status");
+  if (!status) {
+    status = document.createElement("div");
+    status.id = "save-status";
+    status.className = "save-status";
+    document.body.append(status);
+  }
+  status.textContent = message;
+  status.hidden = false;
+  window.setTimeout(() => { status.hidden = true; }, 2200);
+}
 
 function setActive(selector, btn) {
   document
@@ -384,6 +511,7 @@ function setActive(selector, btn) {
 }
 
 viewEl.addEventListener("click", (e) => {
+  if (ui.demoMode) return;
   const btn = e.target.closest("[data-action]");
   if (!btn) return;
   const action = btn.dataset.action;
@@ -404,7 +532,11 @@ viewEl.addEventListener("click", (e) => {
   }
   else if (action === "add-asset") Store.addAsset(ui.scope);
   else if (action === "remove-asset") Store.removeAsset(assetId);
-  else if (action === "export") return exportJson();
+  else if (action === "save") {
+    Store.save();
+    showStatus("Gespeichert");
+    return;
+  } else if (action === "export") return exportJson();
   else if (action === "import") return importFileEl.click();
   else if (action === "reset") {
     if (!confirm("Alle Änderungen verwerfen und die Excel-Daten neu laden?")) return;
@@ -416,6 +548,7 @@ viewEl.addEventListener("click", (e) => {
 
 // Tippen: nur speichern, kein Neuaufbau (Fokus soll erhalten bleiben).
 viewEl.addEventListener("input", (e) => {
+  if (ui.demoMode) return;
   const el = e.target;
   const field = el.dataset.field;
   const setting = el.dataset.setting;

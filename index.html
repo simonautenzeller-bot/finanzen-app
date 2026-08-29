@@ -28,15 +28,22 @@
             <button type="button" class="segmented__btn is-active" data-period="month">Monat</button>
             <button type="button" class="segmented__btn" data-period="year">Jahr</button>
           </div>
+          <button type="button" class="menu-toggle" id="menu-toggle" aria-label="Menü öffnen" aria-expanded="false" title="Menü">☰</button>
         </div>
       </div>
       <nav class="tabs" id="tabs" aria-label="Ansichten">
         <button type="button" class="tab is-active" data-tab="overview">Überblick</button>
         <button type="button" class="tab" data-tab="budget">Budget</button>
         <button type="button" class="tab" data-tab="assets">Vermögen</button>
-        <button type="button" class="tab" data-tab="data">Einstellungen</button>
       </nav>
     </header>
+
+    <aside class="app-menu" id="app-menu" hidden aria-label="App-Menü">
+      <button type="button" data-menu-action="settings">Einstellungen</button>
+      <button type="button" data-menu-action="quick-add">Hinzufügen</button>
+      <button type="button" data-menu-action="save">Jetzt speichern</button>
+      <button type="button" data-menu-action="demo">Demo-Modus aktivieren</button>
+    </aside>
 
     <main class="view" id="view"></main>
 
