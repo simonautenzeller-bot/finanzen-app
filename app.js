@@ -101,6 +101,7 @@ function ownerOptions(selected) {
 /* ---------------------------------------------------------------- Views */
 
 function render() {
+  const openAccordions = ui.tab === "budget" ? getOpenBudgetAccordions() : null;
   renderScopeLabels();
   syncUiControls();
   viewEl.classList.toggle("is-demo", ui.demoMode);
@@ -109,6 +110,23 @@ function render() {
   else if (ui.tab === "budget") viewEl.innerHTML = renderBudget(calc);
   else if (ui.tab === "assets") viewEl.innerHTML = renderAssets(calc);
   else viewEl.innerHTML = renderData();
+  if (openAccordions) restoreOpenBudgetAccordions(openAccordions);
+}
+
+function getOpenBudgetAccordions() {
+  return {
+    types: [...viewEl.querySelectorAll(".type-section[open]")].map((section) => section.dataset.type),
+    groups: [...viewEl.querySelectorAll(".group[open]")].map((group) => group.dataset.group),
+  };
+}
+
+function restoreOpenBudgetAccordions(openAccordions) {
+  openAccordions.types.forEach((type) => {
+    viewEl.querySelector(`.type-section[data-type="${type}"]`)?.setAttribute("open", "");
+  });
+  openAccordions.groups.forEach((groupId) => {
+    viewEl.querySelector(`.group[data-group="${groupId}"]`)?.setAttribute("open", "");
+  });
 }
 
 function renderScopeLabels() {
@@ -240,7 +258,7 @@ function renderBudget(calc) {
     );
     const total = groups.reduce((sum, g) => sum + g.total, 0);
     return `
-      <details class="type-section">
+      <details class="type-section" data-type="${type}">
         <summary class="type-section__head">
           <h2>${esc(meta.label)}</h2>
           <span class="type-section__total is-${meta.sign > 0 ? "pos" : "neg"}">${fmt(
