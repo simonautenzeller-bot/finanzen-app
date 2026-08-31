@@ -42,11 +42,13 @@ summary:focus-visible {
 }
 
 .topbar__row {
+  position: relative;
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
   align-items: center;
   justify-content: space-between;
+  padding-right: 48px;
 }
 
 .topbar__title {
@@ -62,6 +64,9 @@ summary:focus-visible {
 }
 
 .menu-toggle {
+  position: absolute;
+  top: 0;
+  right: 0;
   width: 36px;
   height: 36px;
   border: 1px solid var(--line);
@@ -701,6 +706,10 @@ input[type="range"] {
 @media (max-width: 860px) {
   .app-menu {
     top: 112px;
+  }
+
+  .topbar__row {
+    padding-right: 44px;
   }
 
   .plan-strip {
