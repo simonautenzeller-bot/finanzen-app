@@ -293,10 +293,11 @@ function renderBudget(calc) {
 function renderGroup(g, f) {
   const rows = g.entries
     .map(
-      (row) => `
+      (row, index) => `
       <div class="entry${row.entry.active ? "" : " entry--off"}" data-group="${g.group.id}" data-entry="${
         row.entry.id
       }">
+        <span class="entry__drag" draggable="true" title="Eintrag verschieben" aria-label="Eintrag verschieben">&#x283F;</span>
         <input class="input entry__name" type="text" value="${esc(row.entry.name)}"
                placeholder="Bezeichnung" data-field="name" aria-label="Bezeichnung" />
         <input class="input entry__amount" type="text" inputmode="decimal"
@@ -306,6 +307,8 @@ function renderGroup(g, f) {
           <input type="checkbox" data-field="active" ${row.entry.active ? "checked" : ""} />
         </label>
         <span class="entry__share">${fmt(row.value * f)}</span>
+        <input class="input entry__position" type="number" min="1" max="${g.entries.length}" step="1"
+               value="${index + 1}" data-field="position" aria-label="Position" title="Position" />
         <button type="button" class="icon-btn" data-action="remove-entry" aria-label="Eintrag ${esc(row.entry.name || "ohne Namen")} löschen" title="Eintrag löschen">✕</button>
         ${row.entry.note ? `<p class="entry__note">${esc(row.entry.note)}</p>` : ""}
         ${g.group.type === "einnahme" ? renderIncomeDetails(g.group.id, row.entry) : ""}
@@ -327,7 +330,7 @@ function renderGroup(g, f) {
           <button type="button" class="icon-btn" data-action="remove-group" aria-label="Gruppe ${esc(g.group.name)} löschen" title="Gruppe löschen">✕</button>
         </div>
       <div class="entry-head">
-        <span>Bezeichnung</span><span>€ / Monat</span><span>Aktiv</span><span>Anteil</span><span></span>
+        <span></span><span>Bezeichnung</span><span>€ / Monat</span><span>Aktiv</span><span>Anteil</span><span>Pos.</span><span></span>
       </div>
       ${rows || `<p class="empty">Noch keine Einträge.</p>`}
       <button type="button" class="btn btn--ghost btn--sm" data-action="add-entry">+ Eintrag</button>
@@ -604,6 +607,54 @@ viewEl.addEventListener("click", (e) => {
   } else return;
 
   render();
+});
+
+viewEl.addEventListener("change", (e) => {
+  if (ui.demoMode || e.target.dataset.field !== "position") return;
+  const entryEl = e.target.closest("[data-entry]");
+  const groupId = entryEl?.dataset.group;
+  const entryId = entryEl?.dataset.entry;
+  const group = Store.group(groupId);
+  if (!group || !entryId) return;
+  const position = Number.parseInt(e.target.value, 10);
+  const targetIndex = Number.isFinite(position) ? position - 1 : 0;
+  Store.moveEntry(groupId, entryId, targetIndex);
+  render();
+});
+
+let draggedEntry = null;
+
+viewEl.addEventListener("dragstart", (e) => {
+  const handle = e.target.closest(".entry__drag");
+  const entryEl = handle?.closest("[data-entry]");
+  if (ui.demoMode || !entryEl) return;
+  draggedEntry = { groupId: entryEl.dataset.group, entryId: entryEl.dataset.entry };
+  e.dataTransfer.effectAllowed = "move";
+  e.dataTransfer.setData("text/plain", entryEl.dataset.entry);
+  entryEl.classList.add("entry--dragging");
+});
+
+viewEl.addEventListener("dragover", (e) => {
+  const target = e.target.closest(".entry[data-entry]");
+  if (!draggedEntry || !target || target.dataset.group !== draggedEntry.groupId) return;
+  e.preventDefault();
+  e.dataTransfer.dropEffect = "move";
+});
+
+viewEl.addEventListener("drop", (e) => {
+  const target = e.target.closest(".entry[data-entry]");
+  if (!draggedEntry || !target || target.dataset.group !== draggedEntry.groupId) return;
+  e.preventDefault();
+  const entries = [...target.parentElement.querySelectorAll(".entry[data-entry]")];
+  const targetIndex = entries.indexOf(target) + (e.clientY > target.getBoundingClientRect().top + target.offsetHeight / 2 ? 1 : 0);
+  Store.moveEntry(draggedEntry.groupId, draggedEntry.entryId, targetIndex);
+  draggedEntry = null;
+  render();
+});
+
+viewEl.addEventListener("dragend", () => {
+  draggedEntry = null;
+  viewEl.querySelectorAll(".entry--dragging").forEach((entry) => entry.classList.remove("entry--dragging"));
 });
 
 // Tippen: nur speichern, kein Neuaufbau (Fokus soll erhalten bleiben).

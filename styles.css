@@ -423,7 +423,7 @@ summary:focus-visible {
 .entry-head,
 .entry {
   display: grid;
-  grid-template-columns: minmax(140px, 2fr) 110px 44px minmax(90px, auto) 36px;
+  grid-template-columns: 20px minmax(140px, 2fr) 110px 44px minmax(90px, auto) 56px 36px;
   gap: 8px;
   align-items: center;
 }
@@ -443,6 +443,23 @@ summary:focus-visible {
   padding: 4px 0;
 }
 
+.entry--dragging {
+  opacity: 0.3;
+}
+
+.entry__drag {
+  color: var(--muted);
+  cursor: grab;
+  font-size: 19px;
+  line-height: 1;
+  text-align: center;
+  user-select: none;
+}
+
+.entry__drag:active {
+  cursor: grabbing;
+}
+
 .entry--off {
   opacity: 0.45;
 }
@@ -455,6 +472,11 @@ summary:focus-visible {
 .entry__amount,
 .entry__share {
   text-align: right;
+}
+
+.entry__position {
+  min-width: 0;
+  text-align: center;
 }
 
 .entry__active {

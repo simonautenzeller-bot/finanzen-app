@@ -123,6 +123,19 @@ const Store = {
     this.save();
   },
 
+  moveEntry(groupId, entryId, targetIndex) {
+    const group = this.group(groupId);
+    if (!group) return false;
+    const sourceIndex = group.entries.findIndex((entry) => entry.id === entryId);
+    if (sourceIndex < 0) return false;
+    const boundedIndex = Math.max(0, Math.min(Math.trunc(targetIndex), group.entries.length - 1));
+    if (sourceIndex === boundedIndex) return false;
+    const [entry] = group.entries.splice(sourceIndex, 1);
+    group.entries.splice(boundedIndex, 0, entry);
+    this.save();
+    return true;
+  },
+
   addBreakdownItem(groupId, entryId) {
     const entry = this.entry(groupId, entryId);
     if (!entry) return null;
