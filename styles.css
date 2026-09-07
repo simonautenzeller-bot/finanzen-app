@@ -153,22 +153,6 @@ summary:focus-visible {
   color: var(--accent-text);
 }
 
-.theme-toggle {
-  min-height: 32px;
-  padding: 6px 12px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: var(--bg-soft);
-  color: var(--text);
-  font: inherit;
-  font-size: 13px;
-  cursor: pointer;
-}
-
-.theme-toggle:hover {
-  border-color: var(--accent);
-}
-
 .tabs {
   display: flex;
   gap: 4px;

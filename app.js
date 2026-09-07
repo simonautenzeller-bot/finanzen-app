@@ -151,12 +151,10 @@ function syncUiControls() {
   document.querySelector('[data-menu-action="demo"]').textContent = ui.demoMode
     ? "Demo-Modus beenden"
     : "Demo-Modus aktivieren";
-  const themeToggle = document.getElementById("theme-toggle");
+  const themeToggle = document.querySelector('[data-menu-action="theme"]');
   const lightMode = ui.theme === "light";
-  themeToggle.textContent = lightMode ? "Dunkel" : "Hell";
+  themeToggle.textContent = `${lightMode ? "Dunklen" : "Hellen"} Modus aktivieren`;
   themeToggle.setAttribute("aria-pressed", String(lightMode));
-  themeToggle.setAttribute("aria-label", `${lightMode ? "Dunklen" : "Hellen"} Modus aktivieren`);
-  themeToggle.title = themeToggle.getAttribute("aria-label");
 }
 
 function applyTheme() {
@@ -476,12 +474,6 @@ document.getElementById("period-switch").addEventListener("click", (e) => {
   render();
 });
 
-document.getElementById("theme-toggle").addEventListener("click", () => {
-  ui.theme = ui.theme === "dark" ? "light" : "dark";
-  saveUiState();
-  render();
-});
-
 document.getElementById("tabs").addEventListener("click", (e) => {
   const btn = e.target.closest("[data-tab]");
   if (!btn) return;
@@ -520,6 +512,10 @@ appMenuEl.addEventListener("click", (e) => {
   } else if (action === "save") {
     Store.save();
     showStatus("Gespeichert");
+  } else if (action === "theme") {
+    ui.theme = ui.theme === "dark" ? "light" : "dark";
+    saveUiState();
+    render();
   } else if (action === "demo") {
     ui.demoMode = !ui.demoMode;
     saveUiState();
