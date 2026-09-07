@@ -6,9 +6,27 @@
   --text: #e8ecf3;
   --muted: #c1cada;
   --accent: #82afff;
+  --accent-text: #0c1728;
+  --focus: #ffffff;
+  --status-text: #10231b;
   --pos: #66e0a3;
   --neg: #ffaaa5;
   --radius: 14px;
+}
+
+:root[data-theme="light"] {
+  --bg: #f5f7fa;
+  --bg-soft: #ffffff;
+  --bg-input: #ffffff;
+  --line: #6b778c;
+  --text: #172033;
+  --muted: #43516a;
+  --accent: #2f6fdb;
+  --accent-text: #ffffff;
+  --focus: #172033;
+  --status-text: #ffffff;
+  --pos: #18794e;
+  --neg: #c5342e;
 }
 
 * {
@@ -26,7 +44,7 @@ button:focus-visible,
 input:focus-visible,
 select:focus-visible,
 summary:focus-visible {
-  outline: 3px solid #fff;
+  outline: 3px solid var(--focus);
   outline-offset: 3px;
 }
 
@@ -39,6 +57,10 @@ summary:focus-visible {
   background: rgba(15, 17, 21, 0.95);
   border-bottom: 1px solid var(--line);
   backdrop-filter: blur(8px);
+}
+
+:root[data-theme="light"] .topbar {
+  background: rgba(245, 247, 250, 0.95);
 }
 
 .topbar__row {
@@ -128,7 +150,23 @@ summary:focus-visible {
 
 .segmented__btn.is-active {
   background: var(--accent);
-  color: #fff;
+  color: var(--accent-text);
+}
+
+.theme-toggle {
+  min-height: 32px;
+  padding: 6px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--bg-soft);
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.theme-toggle:hover {
+  border-color: var(--accent);
 }
 
 .tabs {
@@ -207,6 +245,10 @@ summary:focus-visible {
 .card--big {
   background: #192238;
   border-color: var(--accent);
+}
+
+:root[data-theme="light"] .card--big {
+  background: #e8f0ff;
 }
 
 .card__label {
@@ -502,6 +544,10 @@ summary:focus-visible {
   border-left: 2px solid var(--accent);
 }
 
+:root[data-theme="light"] .income-details {
+  background: #edf2f8;
+}
+
 .income-details__head {
   grid-column: 1 / -1;
   font-size: 13px;
@@ -546,7 +592,7 @@ summary:focus-visible {
   font: inherit;
 }
 
-.input:focus {
+.input:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: -1px;
 }
@@ -586,7 +632,7 @@ input[type="range"] {
   border: 1px solid var(--line);
   border-radius: 10px;
   background: var(--accent);
-  color: #fff;
+  color: var(--accent-text);
   font: inherit;
   cursor: pointer;
 }
@@ -643,7 +689,7 @@ input[type="range"] {
   padding: 10px 14px;
   border-radius: 8px;
   background: var(--pos);
-  color: #10231b;
+  color: var(--status-text);
   font-weight: 600;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
 }

@@ -1,5 +1,6 @@
 const UI_STORAGE_KEY = "finanzen-app:ui-v1";
-const ui = { tab: "overview", scope: "ich", period: "month", demoMode: false, ...loadUiState() };
+const ui = { tab: "overview", scope: "ich", period: "month", demoMode: false, theme: "dark", ...loadUiState() };
+ui.theme = ui.theme === "light" ? "light" : "dark";
 
 const DEMO_DATA = {
   settings: { myName: "Alex", partnerName: "Jamie" },
@@ -102,6 +103,7 @@ function ownerOptions(selected) {
 
 function render() {
   const openAccordions = ui.tab === "budget" ? getOpenBudgetAccordions() : null;
+  applyTheme();
   renderScopeLabels();
   syncUiControls();
   viewEl.classList.toggle("is-demo", ui.demoMode);
@@ -149,6 +151,18 @@ function syncUiControls() {
   document.querySelector('[data-menu-action="demo"]').textContent = ui.demoMode
     ? "Demo-Modus beenden"
     : "Demo-Modus aktivieren";
+  const themeToggle = document.getElementById("theme-toggle");
+  const lightMode = ui.theme === "light";
+  themeToggle.textContent = lightMode ? "Dunkel" : "Hell";
+  themeToggle.setAttribute("aria-pressed", String(lightMode));
+  themeToggle.setAttribute("aria-label", `${lightMode ? "Dunklen" : "Hellen"} Modus aktivieren`);
+  themeToggle.title = themeToggle.getAttribute("aria-label");
+}
+
+function applyTheme() {
+  const lightMode = ui.theme === "light";
+  document.documentElement.dataset.theme = ui.theme;
+  document.querySelector('meta[name="theme-color"]').content = lightMode ? "#f5f7fa" : "#0f1115";
 }
 
 function renderOverview(calc) {
@@ -304,7 +318,7 @@ function renderGroup(g, f) {
                value="${row.entry.amount.toFixed(2).replace(".", ",")}"
                data-field="amount" aria-label="Betrag pro Monat" />
         <label class="entry__active" title="Aktiv">
-          <input type="checkbox" data-field="active" ${row.entry.active ? "checked" : ""} />
+          <input type="checkbox" data-field="active" aria-label="Aktiv" ${row.entry.active ? "checked" : ""} />
         </label>
         <span class="entry__share">${fmt(row.value * f)}</span>
         <input class="input entry__position" type="number" min="1" max="${g.entries.length}" step="1"
@@ -462,6 +476,12 @@ document.getElementById("period-switch").addEventListener("click", (e) => {
   render();
 });
 
+document.getElementById("theme-toggle").addEventListener("click", () => {
+  ui.theme = ui.theme === "dark" ? "light" : "dark";
+  saveUiState();
+  render();
+});
+
 document.getElementById("tabs").addEventListener("click", (e) => {
   const btn = e.target.closest("[data-tab]");
   if (!btn) return;
@@ -560,6 +580,8 @@ function showStatus(message) {
     status = document.createElement("div");
     status.id = "save-status";
     status.className = "save-status";
+    status.setAttribute("role", "status");
+    status.setAttribute("aria-live", "polite");
     document.body.append(status);
   }
   status.textContent = message;
