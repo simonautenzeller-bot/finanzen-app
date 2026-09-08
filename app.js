@@ -309,7 +309,11 @@ function renderGroup(g, f) {
       <div class="entry${row.entry.active ? "" : " entry--off"}" data-group="${g.group.id}" data-entry="${
         row.entry.id
       }">
-        <span class="entry__drag" draggable="true" title="Eintrag verschieben" aria-label="Eintrag verschieben">&#x283F;</span>
+        <div class="entry__reorder">
+          <span class="entry__drag" draggable="true" title="Eintrag ziehen" aria-label="Eintrag ziehen zum Verschieben">&#x283F;</span>
+          <input class="input entry__position" type="number" min="1" max="${g.entries.length}" step="1"
+                 value="${index + 1}" data-field="position" aria-label="Position (1 = oben)" title="Position" />
+        </div>
         <input class="input entry__name" type="text" value="${esc(row.entry.name)}"
                placeholder="Bezeichnung" data-field="name" aria-label="Bezeichnung" />
         <input class="input entry__amount" type="text" inputmode="decimal"
@@ -319,8 +323,6 @@ function renderGroup(g, f) {
           <input type="checkbox" data-field="active" aria-label="Aktiv" ${row.entry.active ? "checked" : ""} />
         </label>
         <span class="entry__share">${fmt(row.value * f)}</span>
-        <input class="input entry__position" type="number" min="1" max="${g.entries.length}" step="1"
-               value="${index + 1}" data-field="position" aria-label="Position" title="Position" />
         <button type="button" class="icon-btn" data-action="remove-entry" aria-label="Eintrag ${esc(row.entry.name || "ohne Namen")} löschen" title="Eintrag löschen">✕</button>
         ${row.entry.note ? `<p class="entry__note">${esc(row.entry.note)}</p>` : ""}
         ${g.group.type === "einnahme" ? renderIncomeDetails(g.group.id, row.entry) : ""}
@@ -342,7 +344,7 @@ function renderGroup(g, f) {
           <button type="button" class="icon-btn" data-action="remove-group" aria-label="Gruppe ${esc(g.group.name)} löschen" title="Gruppe löschen">✕</button>
         </div>
       <div class="entry-head">
-        <span></span><span>Bezeichnung</span><span>€ / Monat</span><span>Aktiv</span><span>Anteil</span><span>Pos.</span><span></span>
+        <span>Pos.</span><span>Bezeichnung</span><span>€ / Monat</span><span>Aktiv</span><span>Anteil</span><span></span>
       </div>
       ${rows || `<p class="empty">Noch keine Einträge.</p>`}
       <button type="button" class="btn btn--ghost btn--sm" data-action="add-entry">+ Eintrag</button>
