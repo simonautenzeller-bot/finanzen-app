@@ -74,7 +74,7 @@ summary:focus-visible {
   gap: 12px;
   align-items: center;
   justify-content: space-between;
-  padding-right: 48px;
+  padding-right: 92px;
 }
 
 .topbar__title {
@@ -89,18 +89,27 @@ summary:focus-visible {
   gap: 8px;
 }
 
-.menu-toggle {
+.icon-toggles {
   position: absolute;
   top: 0;
   right: 0;
+  display: flex;
+  gap: 8px;
+}
+
+.icon-toggle,
+.menu-toggle {
   width: 36px;
   height: 36px;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--bg-soft);
   color: var(--text);
-  font: 20px/1 sans-serif;
+  font: 18px/1 sans-serif;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .app-menu {
@@ -790,13 +799,13 @@ input[type="range"] {
   font-size: 12px;
 }
 
+.hint--error {
+  color: var(--neg);
+}
+
 @media (max-width: 860px) {
   .app-menu {
     top: 112px;
-  }
-
-  .topbar__row {
-    padding-right: 44px;
   }
 
   .plan-strip {

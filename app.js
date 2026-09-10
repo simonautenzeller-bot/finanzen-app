@@ -151,10 +151,12 @@ function syncUiControls() {
   document.querySelector('[data-menu-action="demo"]').textContent = ui.demoMode
     ? "Demo-Modus beenden"
     : "Demo-Modus aktivieren";
-  const themeToggle = document.querySelector('[data-menu-action="theme"]');
   const lightMode = ui.theme === "light";
-  themeToggle.textContent = `${lightMode ? "Dunklen" : "Hellen"} Modus aktivieren`;
-  themeToggle.setAttribute("aria-pressed", String(lightMode));
+  const themeLabel = `${lightMode ? "Dunklen" : "Hellen"} Modus aktivieren`;
+  themeToggleEl.textContent = lightMode ? "☀" : "🌙";
+  themeToggleEl.setAttribute("aria-pressed", String(lightMode));
+  themeToggleEl.setAttribute("aria-label", themeLabel);
+  themeToggleEl.title = themeLabel;
 }
 
 function applyTheme() {
@@ -407,6 +409,11 @@ function renderAssets(calc) {
         <h2 class="panel__title">Vermögen · ${esc(scopeLabel())}</h2>
         <p class="big-number">${fmt(calc.assets)}</p>
       </div>
+      ${
+        ui.scope === "haushalt"
+          ? `<p class="scope-note">Der Haushalt führt die Bereiche zusammen. Neue Positionen werden bei der jeweiligen Person erfasst.</p>`
+          : ""
+      }
       <article class="group group--assets">
         <div class="entry-head entry-head--assets">
           <span>Name</span><span>Wert</span><span>Stand</span><span></span>
@@ -444,13 +451,12 @@ function renderData() {
       <div class="panel">
         <h2 class="panel__title">Daten</h2>
         <div class="btn-row">
-          <button type="button" class="btn" data-action="save">Jetzt speichern</button>
           <button type="button" class="btn" data-action="export">Als JSON sichern</button>
           <button type="button" class="btn" data-action="import">JSON laden</button>
           <button type="button" class="btn btn--danger" data-action="reset">Auf Excel-Stand zurücksetzen</button>
         </div>
-        <p class="hint">Alles wird lokal im Browser gespeichert (localStorage). Für Backups die
-          JSON-Datei sichern.</p>
+        <p class="hint">Alles wird automatisch bei jeder Änderung lokal im Browser gespeichert
+          (localStorage). Für Backups die JSON-Datei sichern.</p>
       </div>
           ${ui.demoMode ? `<div class="demo-banner">Demo-Modus ist aktiv. Es werden ausschließlich Beispieldaten angezeigt und keine echten Beträge.</div>` : ""}
     </div>`;
@@ -487,6 +493,7 @@ document.getElementById("tabs").addEventListener("click", (e) => {
 
 const menuToggleEl = document.getElementById("menu-toggle");
 const appMenuEl = document.getElementById("app-menu");
+const themeToggleEl = document.getElementById("theme-toggle");
 const quickEntryDialogEl = document.getElementById("quick-entry-dialog");
 const quickEntryFormEl = document.getElementById("quick-entry-form");
 const quickEntryTypeEl = document.getElementById("quick-entry-type");
@@ -497,6 +504,12 @@ menuToggleEl.addEventListener("click", () => {
   const isOpen = appMenuEl.hidden;
   appMenuEl.hidden = !isOpen;
   menuToggleEl.setAttribute("aria-expanded", String(isOpen));
+});
+
+themeToggleEl.addEventListener("click", () => {
+  ui.theme = ui.theme === "dark" ? "light" : "dark";
+  saveUiState();
+  render();
 });
 
 appMenuEl.addEventListener("click", (e) => {
@@ -511,13 +524,6 @@ appMenuEl.addEventListener("click", (e) => {
     render();
   } else if (action === "quick-add") {
     openQuickEntry();
-  } else if (action === "save") {
-    Store.save();
-    showStatus("Gespeichert");
-  } else if (action === "theme") {
-    ui.theme = ui.theme === "dark" ? "light" : "dark";
-    saveUiState();
-    render();
   } else if (action === "demo") {
     ui.demoMode = !ui.demoMode;
     saveUiState();
@@ -543,9 +549,16 @@ function refreshQuickEntryGroups() {
   quickEntryGroupEl.innerHTML = groups.length
     ? groups.map((group) => `<option value="${group.id}">${esc(group.name)}</option>`).join("")
     : `<option value="new">Neue Gruppe anlegen</option>`;
+  quickEntryHintEl.classList.remove("hint--error");
   quickEntryHintEl.textContent = groups.length
     ? "Der Eintrag wird der ausgewählten Gruppe zugeordnet."
     : `Für ${GROUP_TYPES[type].label} gibt es noch keine Gruppe. Eine neue wird angelegt.`;
+}
+
+function showQuickEntryError(message, focusEl) {
+  quickEntryHintEl.textContent = message;
+  quickEntryHintEl.classList.add("hint--error");
+  focusEl.focus();
 }
 
 quickEntryTypeEl.addEventListener("change", refreshQuickEntryGroups);
@@ -555,9 +568,12 @@ document.getElementById("quick-entry-cancel").addEventListener("click", () => qu
 quickEntryFormEl.addEventListener("submit", (event) => {
   event.preventDefault();
   const type = quickEntryTypeEl.value;
-  const name = document.getElementById("quick-entry-name").value.trim();
-  const amount = parseAmount(document.getElementById("quick-entry-amount").value);
-  if (!name || !amount) return;
+  const nameEl = document.getElementById("quick-entry-name");
+  const amountEl = document.getElementById("quick-entry-amount");
+  const name = nameEl.value.trim();
+  const amount = parseAmount(amountEl.value);
+  if (!name) return showQuickEntryError("Bitte eine Bezeichnung eingeben.", nameEl);
+  if (!amount) return showQuickEntryError("Bitte einen Betrag größer als 0 eingeben.", amountEl);
   let group = Store.group(quickEntryGroupEl.value);
   if (!group) group = Store.addGroup(type, ui.scope);
   const entry = Store.addEntry(group.id);
@@ -585,6 +601,14 @@ function showStatus(message) {
   status.textContent = message;
   status.hidden = false;
   window.setTimeout(() => { status.hidden = true; }, 2200);
+}
+
+let saveStatusTimer = null;
+
+/** Zeigt "Gespeichert" erst an, wenn kurz keine weitere Änderung mehr kommt (z. B. beim Tippen). */
+function debouncedSaveStatus() {
+  window.clearTimeout(saveStatusTimer);
+  saveStatusTimer = window.setTimeout(() => showStatus("Gespeichert"), 600);
 }
 
 function setActive(selector, btn) {
@@ -615,17 +639,16 @@ viewEl.addEventListener("click", (e) => {
   }
   else if (action === "add-asset") Store.addAsset(ui.scope);
   else if (action === "remove-asset") Store.removeAsset(assetId);
-  else if (action === "save") {
-    Store.save();
-    showStatus("Gespeichert");
-    return;
-  } else if (action === "export") return exportJson();
+  else if (action === "export") return exportJson();
   else if (action === "import") return importFileEl.click();
   else if (action === "reset") {
     if (!confirm("Alle Änderungen verwerfen und die Excel-Daten neu laden?")) return;
     Store.reset();
+    showStatus("Zurückgesetzt");
+    return render();
   } else return;
 
+  showStatus("Gespeichert");
   render();
 });
 
@@ -688,6 +711,7 @@ viewEl.addEventListener("input", (e) => {
     Store.state.settings[setting] = el.value;
     Store.save();
     renderScopeLabels();
+    debouncedSaveStatus();
     return;
   }
   if (!field) return;
@@ -722,6 +746,7 @@ viewEl.addEventListener("input", (e) => {
 
   Store.save();
   refreshTotals();
+  debouncedSaveStatus();
 });
 
 // Nach dem Verlassen eines Betragsfeldes sauber formatiert anzeigen.
@@ -785,6 +810,7 @@ importFileEl.addEventListener("change", async () => {
   try {
     Store.replace(JSON.parse(await file.text()));
     render();
+    showStatus("Importiert");
   } catch {
     alert("Die Datei konnte nicht gelesen werden.");
   }

@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <title>Finanzen – Tests</title>
+    <style>
+      body { font: 14px/1.6 "Segoe UI", monospace; padding: 24px; background: #0f1115; color: #e8ecf3; }
+      h1 { font-size: 18px; }
+      ul { list-style: none; padding: 0; }
+      li { margin-bottom: 6px; padding: 6px 10px; border-radius: 6px; background: #161a21; }
+      .pass { color: #66e0a3; }
+      .fail { color: #ffaaa5; }
+      .summary { margin-top: 16px; font-weight: 600; }
+    </style>
+  </head>
+  <body>
+    <h1>Store-Tests (calculate / migrate)</h1>
+    <p>Läuft ohne Build-Schritt direkt im Browser – prüft die Berechnungslogik aus <code>store.js</code>
+      gegen ein paar Fixture-Daten.</p>
+    <ul id="results"></ul>
+    <p class="summary" id="summary"></p>
+
+    <script src="seed.js"></script>
+    <script src="store.js"></script>
+    <script>
+      const results = [];
+
+      function check(name, actual, expected) {
+        const pass = Math.abs(actual - expected) < 0.005;
+        results.push({ name, pass, actual, expected });
+      }
+
+      // Haushalt summiert beide Bereiche, keine Quotenrechnung.
+      (function () {
+        const state = {
+          settings: { myName: "Ich", partnerName: "Partner" },
+          assets: [],
+          groups: [
+            { id: "g1", type: "einnahme", name: "Einnahmen", owner: "ich", entries: [
+              { id: "e1", name: "A", amount: 1000, owner: "ich", active: true },
+            ] },
+            { id: "g2", type: "einnahme", name: "Einnahmen", owner: "partner", entries: [
+              { id: "e2", name: "B", amount: 500, owner: "partner", active: true },
+            ] },
+          ],
+        };
+        const calc = calculate(state, "haushalt");
+        check("Haushalt summiert beide Bereiche (1000 + 500)", calc.income, 1500);
+      })();
+
+      // Inaktive Einträge zählen nicht mit.
+      (function () {
+        const state = {
+          settings: { myName: "Ich", partnerName: "Partner" },
+          assets: [],
+          groups: [
+            { id: "g1", type: "fix", name: "Fix", owner: "ich", entries: [
+              { id: "e1", name: "aktiv", amount: 100, owner: "ich", active: true },
+              { id: "e2", name: "inaktiv", amount: 50, owner: "ich", active: false },
+            ] },
+          ],
+        };
+        const calc = calculate(state, "ich");
+        check("Inaktive Einträge zählen nicht mit", calc.fixed, 100);
+      })();
+
+      // Bereichsumschalter filtert nach Owner.
+      (function () {
+        const state = {
+          settings: { myName: "Ich", partnerName: "Partner" },
+          assets: [],
+          groups: [
+            { id: "g1", type: "variabel", name: "V", owner: "ich", entries: [
+              { id: "e1", name: "x", amount: 30, owner: "ich", active: true },
+            ] },
+            { id: "g2", type: "variabel", name: "V2", owner: "partner", entries: [
+              { id: "e2", name: "y", amount: 70, owner: "partner", active: true },
+            ] },
+          ],
+        };
+        const calc = calculate(state, "partner");
+        check("Bereich 'partner' zeigt nur eigene Ausgaben", calc.variable, 70);
+      })();
+
+      // Ergebnis-Formel: Einnahmen - Fixkosten - Variable Kosten - Sparen.
+      (function () {
+        const state = {
+          settings: { myName: "Ich", partnerName: "Partner" },
+          assets: [],
+          groups: [
+            { id: "g1", type: "einnahme", name: "E", owner: "ich", entries: [{ id: "e1", name: "x", amount: 2000, owner: "ich", active: true }] },
+            { id: "g2", type: "fix", name: "F", owner: "ich", entries: [{ id: "e2", name: "y", amount: 800, owner: "ich", active: true }] },
+            { id: "g3", type: "variabel", name: "Var", owner: "ich", entries: [{ id: "e3", name: "z", amount: 300, owner: "ich", active: true }] },
+            { id: "g4", type: "sparen", name: "S", owner: "ich", entries: [{ id: "e4", name: "w", amount: 200, owner: "ich", active: true }] },
+          ],
+        };
+        const calc = calculate(state, "ich");
+        check("Ergebnis = Einnahmen − Fix − Variabel − Sparen (2000−800−300−200)", calc.result, 700);
+      })();
+
+      // migrate() ergänzt fehlende Felder und wandelt String-Beträge robust um.
+      (function () {
+        const migrated = Store.migrate({
+          groups: [{ type: "fix", entries: [{ name: "x", amount: "50" }] }],
+        });
+        check("migrate() wandelt String-Beträge in Zahlen um", migrated.groups[0].entries[0].amount, 50);
+      })();
+
+      // migrate() ordnet Assets ohne gültigen Owner "ich" zu.
+      (function () {
+        const migrated = Store.migrate({
+          groups: [],
+          assets: [{ name: "Depot", value: 100, owner: "unbekannt" }],
+        });
+        check("migrate() setzt ungültigen Asset-Owner auf 'ich'", migrated.assets[0].owner === "ich" ? 1 : 0, 1);
+      })();
+
+      const list = document.getElementById("results");
+      results.forEach((r) => {
+        const li = document.createElement("li");
+        li.className = r.pass ? "pass" : "fail";
+        li.textContent = `${r.pass ? "✓" : "✗"} ${r.name}` + (r.pass ? "" : ` — erwartet ${r.expected}, erhalten ${r.actual}`);
+        list.appendChild(li);
+      });
+
+      const failCount = results.filter((r) => !r.pass).length;
+      const summary = document.getElementById("summary");
+      summary.textContent = failCount
+        ? `✗ ${failCount} von ${results.length} Tests fehlgeschlagen`
+        : `✓ Alle ${results.length} Tests bestanden`;
+      summary.className = failCount ? "fail" : "pass";
+      document.title = failCount ? `✗ Tests fehlgeschlagen – Finanzen` : `✓ Tests bestanden – Finanzen`;
+    </script>
+  </body>
+</html>

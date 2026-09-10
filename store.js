@@ -164,7 +164,8 @@ const Store = {
 };
 
 function uid(prefix) {
-  return `${prefix}-${Math.random().toString(36).slice(2, 9)}`;
+  const id = window.crypto?.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2, 9);
+  return `${prefix}-${id}`;
 }
 
 function today() {

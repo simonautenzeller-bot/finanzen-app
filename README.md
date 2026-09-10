@@ -52,6 +52,9 @@ er läuft automatisch über GitHub Pages (HTTPS).
 
 - `index.html` – Grundgerüst
 - `styles.css` – Design
-- `js/seed.js` – Startdaten aus der Excel-Tabelle
-- `js/store.js` – Datenhaltung und Berechnung
-- `js/app.js` – Ansichten und Interaktion
+- `seed.js` – Startdaten aus der Excel-Tabelle
+- `store.js` – Datenhaltung und Berechnung
+- `app.js` – Ansichten und Interaktion
+- `test.html` – Browser-Tests für die Berechnungslogik (ohne Build-Schritt, einfach öffnen)
+- `service-worker.js` – Offline-Cache für die PWA
+- `manifest.webmanifest` – App-Metadaten für die Installation
