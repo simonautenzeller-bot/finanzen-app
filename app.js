@@ -1,6 +1,12 @@
 const UI_STORAGE_KEY = "finanzen-app:ui-v1";
+const THEME_ORDER = ["dark", "dim", "light"];
+const THEME_META = {
+  dark: { icon: "🌙", themeColor: "#0f1115", nextLabel: "Mittleres Theme aktivieren" },
+  dim: { icon: "🌗", themeColor: "#3b4252", nextLabel: "Hellen Modus aktivieren" },
+  light: { icon: "☀", themeColor: "#f5f7fa", nextLabel: "Dunklen Modus aktivieren" },
+};
 const ui = { tab: "overview", scope: "ich", period: "month", demoMode: false, theme: "dark", ...loadUiState() };
-ui.theme = ui.theme === "light" ? "light" : "dark";
+ui.theme = THEME_ORDER.includes(ui.theme) ? ui.theme : "dark";
 
 const DEMO_DATA = {
   settings: { myName: "Alex", partnerName: "Jamie" },
@@ -151,18 +157,15 @@ function syncUiControls() {
   document.querySelector('[data-menu-action="demo"]').textContent = ui.demoMode
     ? "Demo-Modus beenden"
     : "Demo-Modus aktivieren";
-  const lightMode = ui.theme === "light";
-  const themeLabel = `${lightMode ? "Dunklen" : "Hellen"} Modus aktivieren`;
-  themeToggleEl.textContent = lightMode ? "☀" : "🌙";
-  themeToggleEl.setAttribute("aria-pressed", String(lightMode));
-  themeToggleEl.setAttribute("aria-label", themeLabel);
-  themeToggleEl.title = themeLabel;
+  const themeMeta = THEME_META[ui.theme];
+  themeToggleEl.textContent = themeMeta.icon;
+  themeToggleEl.setAttribute("aria-label", themeMeta.nextLabel);
+  themeToggleEl.title = themeMeta.nextLabel;
 }
 
 function applyTheme() {
-  const lightMode = ui.theme === "light";
   document.documentElement.dataset.theme = ui.theme;
-  document.querySelector('meta[name="theme-color"]').content = lightMode ? "#f5f7fa" : "#0f1115";
+  document.querySelector('meta[name="theme-color"]').content = THEME_META[ui.theme].themeColor;
 }
 
 function renderOverview(calc) {
@@ -508,7 +511,8 @@ menuToggleEl.addEventListener("click", () => {
 });
 
 themeToggleEl.addEventListener("click", () => {
-  ui.theme = ui.theme === "dark" ? "light" : "dark";
+  const nextIndex = (THEME_ORDER.indexOf(ui.theme) + 1) % THEME_ORDER.length;
+  ui.theme = THEME_ORDER[nextIndex];
   saveUiState();
   render();
 });

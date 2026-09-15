@@ -43,6 +43,16 @@
   --cat-assets: #0d9488;
 }
 
+/* Mittleres Theme: Kacheln bleiben dunkel/farbig wie im Dark Theme, nur der
+   Seitenhintergrund wird heller — alle anderen Tokens erben von :root. */
+:root[data-theme="dim"] {
+  --bg: #3b4252;
+}
+
+:root[data-theme="dim"] .topbar {
+  background: rgba(59, 66, 82, 0.95);
+}
+
 * {
   box-sizing: border-box;
 }
