@@ -1,5 +1,6 @@
 :root {
   --bg: #0f1115;
+  --page-bg: var(--bg);
   --bg-soft: #161a21;
   --bg-input: #1d222b;
   --line: #272d38;
@@ -46,11 +47,39 @@
 /* Mittleres Theme: Kacheln bleiben dunkel/farbig wie im Dark Theme, nur der
    Seitenhintergrund wird heller — alle anderen Tokens erben von :root. */
 :root[data-theme="dim"] {
-  --bg: #3b4252;
+  --page-bg: #3b4252;
 }
 
 :root[data-theme="dim"] .topbar {
   background: rgba(59, 66, 82, 0.95);
+}
+
+/* Himmel-Theme: gleiche dunkle, farbige Kacheln wie im Dark Theme, aber ein
+   freundlicher hellblauer Seitenhintergrund (wie im Sky-Modus der Wetter-App).
+   Die Topbar bleibt bewusst dunkel (eigenes Gestaltungselement dieser App),
+   dadurch braucht nur der wenige Text, der direkt ohne Kachel auf der Fläche
+   liegt, eine dunkle statt helle Farbe. */
+:root[data-theme="sky"] {
+  --page-bg: #9dd0f5;
+}
+
+:root[data-theme="sky"] .scope-note {
+  color: var(--bg);
+}
+
+:root[data-theme="sky"] .type-section__head {
+  background: var(--bg-soft);
+  border-radius: 10px;
+  padding: 14px 12px;
+}
+
+:root[data-theme="sky"] .type-section > .btn--ghost {
+  color: var(--bg);
+}
+
+:root[data-theme="sky"] .type-section > .btn--ghost:hover {
+  color: var(--bg);
+  border-color: var(--accent);
 }
 
 * {
@@ -59,7 +88,7 @@
 
 body {
   margin: 0;
-  background: var(--bg);
+  background: var(--page-bg);
   color: var(--text);
   font: 15px/1.5 "Segoe UI", system-ui, sans-serif;
 }

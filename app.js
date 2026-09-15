@@ -1,8 +1,9 @@
 const UI_STORAGE_KEY = "finanzen-app:ui-v1";
-const THEME_ORDER = ["dark", "dim", "light"];
+const THEME_ORDER = ["dark", "dim", "sky", "light"];
 const THEME_META = {
   dark: { icon: "🌙", themeColor: "#0f1115", nextLabel: "Mittleres Theme aktivieren" },
-  dim: { icon: "🌗", themeColor: "#3b4252", nextLabel: "Hellen Modus aktivieren" },
+  dim: { icon: "🌗", themeColor: "#3b4252", nextLabel: "Himmel-Modus aktivieren" },
+  sky: { icon: "🌤", themeColor: "#9dd0f5", nextLabel: "Hellen Modus aktivieren" },
   light: { icon: "☀", themeColor: "#f5f7fa", nextLabel: "Dunklen Modus aktivieren" },
 };
 const ui = { tab: "overview", scope: "ich", period: "month", demoMode: false, theme: "dark", ...loadUiState() };
