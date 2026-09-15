@@ -14,6 +14,11 @@
   --radius: 14px;
   --line-strong: #4b5878;
   --shadow: 0 2px 0 rgba(0, 0, 0, 0.4);
+  --cat-planned: #fbbf24;
+  --cat-fixed: #60a5fa;
+  --cat-variable: #fb923c;
+  --cat-savings: #c084fc;
+  --cat-assets: #2dd4bf;
 }
 
 :root[data-theme="light"] {
@@ -31,6 +36,11 @@
   --neg: #c5342e;
   --line-strong: #93a1bd;
   --shadow: 0 2px 0 rgba(23, 32, 51, 0.1);
+  --cat-planned: #d97706;
+  --cat-fixed: #2563eb;
+  --cat-variable: #ea580c;
+  --cat-savings: #9333ea;
+  --cat-assets: #0d9488;
 }
 
 * {
@@ -211,8 +221,23 @@ summary:focus-visible {
 .panel {
   padding: 18px;
   background: var(--bg-soft);
-  border: 1px solid var(--line);
+  border: 1px solid var(--line-strong);
   border-radius: var(--radius);
+}
+
+.panel--income {
+  background: color-mix(in srgb, var(--pos) 8%, var(--bg-soft));
+  border-left: 4px solid var(--pos);
+}
+
+.panel--expense {
+  background: color-mix(in srgb, var(--cat-variable) 8%, var(--bg-soft));
+  border-left: 4px solid var(--cat-variable);
+}
+
+.panel--assets {
+  background: color-mix(in srgb, var(--cat-assets) 8%, var(--bg-soft));
+  border-left: 4px solid var(--cat-assets);
 }
 
 .panel__title {
@@ -235,17 +260,37 @@ summary:focus-visible {
   gap: 6px;
   padding: 16px;
   background: var(--bg-soft);
-  border: 1px solid var(--line);
+  border: 1px solid var(--line-strong);
   border-radius: var(--radius);
 }
 
-.card--big {
-  background: #192238;
-  border-color: var(--accent);
+.card--income {
+  background: color-mix(in srgb, var(--pos) 16%, var(--bg-soft));
+  border-color: color-mix(in srgb, var(--pos) 55%, var(--line-strong));
 }
 
-:root[data-theme="light"] .card--big {
-  background: #e8f0ff;
+.card--planned {
+  background: color-mix(in srgb, var(--cat-planned) 16%, var(--bg-soft));
+  border-color: color-mix(in srgb, var(--cat-planned) 55%, var(--line-strong));
+}
+
+.card--pos {
+  background: color-mix(in srgb, var(--pos) 20%, var(--bg-soft));
+  border-color: color-mix(in srgb, var(--pos) 60%, var(--line-strong));
+}
+
+.card--neg {
+  background: color-mix(in srgb, var(--neg) 18%, var(--bg-soft));
+  border-color: color-mix(in srgb, var(--neg) 60%, var(--line-strong));
+}
+
+.card--neutral {
+  background: color-mix(in srgb, var(--accent) 16%, var(--bg-soft));
+  border-color: color-mix(in srgb, var(--accent) 55%, var(--line-strong));
+}
+
+.card--big {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
 }
 
 .card__label {
@@ -286,12 +331,34 @@ summary:focus-visible {
   background: var(--bg-soft);
   color: var(--muted);
   font-size: 12px;
+  border-top: 3px solid transparent;
 }
 
 .plan-strip strong {
   color: var(--text);
   font-size: 15px;
   font-variant-numeric: tabular-nums;
+}
+
+.plan-strip__item--fixed {
+  border-top-color: var(--cat-fixed);
+}
+.plan-strip__item--fixed strong {
+  color: var(--cat-fixed);
+}
+
+.plan-strip__item--variable {
+  border-top-color: var(--cat-variable);
+}
+.plan-strip__item--variable strong {
+  color: var(--cat-variable);
+}
+
+.plan-strip__item--savings {
+  border-top-color: var(--cat-savings);
+}
+.plan-strip__item--savings strong {
+  color: var(--cat-savings);
 }
 
 .is-pos {
@@ -402,6 +469,34 @@ summary:focus-visible {
   content: "−";
 }
 
+.type-section[data-type="einnahme"] .type-section__head {
+  border-bottom-color: var(--pos);
+}
+.type-section[data-type="einnahme"] .type-section__head::before {
+  color: var(--pos);
+}
+
+.type-section[data-type="fix"] .type-section__head {
+  border-bottom-color: var(--cat-fixed);
+}
+.type-section[data-type="fix"] .type-section__head::before {
+  color: var(--cat-fixed);
+}
+
+.type-section[data-type="variabel"] .type-section__head {
+  border-bottom-color: var(--cat-variable);
+}
+.type-section[data-type="variabel"] .type-section__head::before {
+  color: var(--cat-variable);
+}
+
+.type-section[data-type="sparen"] .type-section__head {
+  border-bottom-color: var(--cat-savings);
+}
+.type-section[data-type="sparen"] .type-section__head::before {
+  color: var(--cat-savings);
+}
+
 .type-section__head h2 {
   margin: 0;
   font-size: 17px;
@@ -423,8 +518,25 @@ summary:focus-visible {
   padding: 14px;
   background: var(--bg-soft);
   border: 1px solid var(--line-strong);
+  border-left: 4px solid var(--line-strong);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
+}
+
+.group[data-type="einnahme"] {
+  border-left-color: var(--pos);
+}
+.group[data-type="fix"] {
+  border-left-color: var(--cat-fixed);
+}
+.group[data-type="variabel"] {
+  border-left-color: var(--cat-variable);
+}
+.group[data-type="sparen"] {
+  border-left-color: var(--cat-savings);
+}
+.group--assets {
+  border-left-color: var(--cat-assets);
 }
 
 .group__head {

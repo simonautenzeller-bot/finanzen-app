@@ -169,13 +169,14 @@ function renderOverview(calc) {
   const f = periodFactor();
   const planned = calc.fixed + calc.variable + calc.savings;
   const cards = [
-    { label: "Einnahmen", detail: "monatlich verfügbar", value: calc.income * f, tone: "pos", prefix: "+" },
-    { label: "Geplant", detail: "Kosten und Sparen", value: planned * f, tone: "neg", prefix: "−" },
+    { label: "Einnahmen", detail: "monatlich verfügbar", value: calc.income * f, tone: "pos", kind: "income", prefix: "+" },
+    { label: "Geplant", detail: "Kosten und Sparen", value: planned * f, tone: "neg", kind: "planned", prefix: "−" },
     {
       label: calc.result >= 0 ? "Verfügbar" : "Fehlbetrag",
       detail: calc.result >= 0 ? "nach allen Planposten" : "Plan übersteigt Einnahmen",
       value: Math.abs(calc.result * f),
       tone: tone(calc.result),
+      kind: tone(calc.result),
       prefix: calc.result >= 0 ? "+" : "−",
       big: true,
     },
@@ -194,7 +195,7 @@ function renderOverview(calc) {
         ${cards
           .map(
             (c) => `
-          <div class="card${c.big ? " card--big" : ""}">
+          <div class="card card--${c.kind}${c.big ? " card--big" : ""}">
             <span class="card__label">${esc(c.label)}</span>
             <span class="card__value is-${c.tone}">${c.prefix} ${fmt(c.value)}</span>
             <span class="card__detail">${esc(c.detail)}</span>
@@ -204,12 +205,12 @@ function renderOverview(calc) {
       </div>
 
       <div class="plan-strip" aria-label="Geplante Monatsaufteilung">
-        <span>Fixkosten <strong>${fmt(calc.fixed * f)}</strong></span>
-        <span>Variabel <strong>${fmt(calc.variable * f)}</strong></span>
-        <span>Sparen <strong>${fmt(calc.savings * f)}</strong></span>
+        <span class="plan-strip__item plan-strip__item--fixed">Fixkosten <strong>${fmt(calc.fixed * f)}</strong></span>
+        <span class="plan-strip__item plan-strip__item--variable">Variabel <strong>${fmt(calc.variable * f)}</strong></span>
+        <span class="plan-strip__item plan-strip__item--savings">Sparen <strong>${fmt(calc.savings * f)}</strong></span>
       </div>
 
-      <div class="panel">
+      <div class="panel panel--expense">
         <h2 class="panel__title">Ausgaben nach Gruppe</h2>
         ${
           expenseGroups.length
@@ -231,7 +232,7 @@ function renderOverview(calc) {
         }
       </div>
 
-      <div class="panel">
+      <div class="panel panel--income">
         <h2 class="panel__title">Einnahmen</h2>
         <ul class="list">
           ${calc.groups
@@ -251,7 +252,7 @@ function renderOverview(calc) {
         </ul>
       </div>
 
-      <div class="panel">
+      <div class="panel panel--assets">
         <h2 class="panel__title">Vermögen</h2>
         <p class="big-number">${fmt(calc.assets)}</p>
       </div>
@@ -333,7 +334,7 @@ function renderGroup(g, f) {
     .join("");
 
   return `
-    <details class="group" data-group="${g.group.id}">
+    <details class="group" data-group="${g.group.id}" data-type="${g.group.type}">
       <summary class="group__head">
         <span class="group__title">${esc(g.group.name)}</span>
         ${ui.scope === "haushalt" ? `<span class="tag">${esc(ownerLabel(g.group.owner))}</span>` : ""}
@@ -405,7 +406,7 @@ function renderAssets(calc) {
 
   return `
     <div class="stack">
-      <div class="panel">
+      <div class="panel panel--assets">
         <h2 class="panel__title">Vermögen · ${esc(scopeLabel())}</h2>
         <p class="big-number">${fmt(calc.assets)}</p>
       </div>
