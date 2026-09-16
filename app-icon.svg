@@ -19,6 +19,7 @@
   <circle cx="256" cy="256" r="184" fill="url(#face)"/>
   <circle cx="256" cy="256" r="153" fill="none" stroke="#ffffff" stroke-opacity="0.22" stroke-width="6"/>
   <circle cx="256" cy="256" r="184" fill="url(#shine)"/>
-  <polyline points="130,330 196,272 238,308 308,216 346,190" fill="none" stroke="#ffffff" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/>
-  <polygon points="374,171 360,210 332,170" fill="#ffffff"/>
+  <g transform="translate(94,92) scale(13.5)">
+    <path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z" fill="#ffffff"/>
+  </g>
 </svg>
