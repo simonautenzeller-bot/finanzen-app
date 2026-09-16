@@ -54,30 +54,31 @@
   background: rgba(59, 66, 82, 0.95);
 }
 
-/* Himmel-Theme: gleiche dunkle, farbige Kacheln wie im Dark Theme, aber ein
-   freundlicher hellblauer Seitenhintergrund (wie im Sky-Modus der Wetter-App).
-   Die Topbar bleibt bewusst dunkel (eigenes Gestaltungselement dieser App),
-   dadurch braucht nur der wenige Text, der direkt ohne Kachel auf der Fläche
-   liegt, eine dunkle statt helle Farbe. */
-:root[data-theme="sky"] {
-  --page-bg: #9dd0f5;
+/* Mint-Theme: gleiche dunkle, farbige Kacheln wie im Dark Theme, aber ein
+   freundlicher, heller Seitenhintergrund — ein sanftes Salbeigrün statt Blau,
+   da Blau hier schon der Akzentfarbe gehört und Grün ohnehin für "Einnahmen"/
+   "Vermögen" steht. Die Topbar bleibt bewusst dunkel (eigenes Gestaltungs-
+   element dieser App), dadurch braucht nur der wenige Text, der direkt ohne
+   Kachel auf der Fläche liegt, eine dunkle statt helle Farbe. */
+:root[data-theme="mint"] {
+  --page-bg: #a8ddc2;
 }
 
-:root[data-theme="sky"] .scope-note {
+:root[data-theme="mint"] .scope-note {
   color: var(--bg);
 }
 
-:root[data-theme="sky"] .type-section__head {
+:root[data-theme="mint"] .type-section__head {
   background: var(--bg-soft);
   border-radius: 10px;
   padding: 14px 12px;
 }
 
-:root[data-theme="sky"] .type-section > .btn--ghost {
+:root[data-theme="mint"] .type-section > .btn--ghost {
   color: var(--bg);
 }
 
-:root[data-theme="sky"] .type-section > .btn--ghost:hover {
+:root[data-theme="mint"] .type-section > .btn--ghost:hover {
   color: var(--bg);
   border-color: var(--accent);
 }
