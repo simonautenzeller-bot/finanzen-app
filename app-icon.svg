@@ -1,10 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <defs>
-    <linearGradient id="rim" x1="70" y1="60" x2="440" y2="450" gradientUnits="userSpaceOnUse">
+    <linearGradient id="rim" x1="0" y1="0" x2="512" y2="512" gradientUnits="userSpaceOnUse">
       <stop offset="0" stop-color="#3f6fd6"/>
       <stop offset="1" stop-color="#2aa878"/>
     </linearGradient>
-    <linearGradient id="face" x1="70" y1="60" x2="440" y2="450" gradientUnits="userSpaceOnUse">
+    <linearGradient id="face" x1="0" y1="0" x2="512" y2="512" gradientUnits="userSpaceOnUse">
       <stop offset="0" stop-color="#5b8cff"/>
       <stop offset="1" stop-color="#3ecf8e"/>
     </linearGradient>
@@ -13,13 +13,11 @@
       <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
     </radialGradient>
   </defs>
-  <rect width="512" height="512" fill="#0f1115"/>
-  <ellipse cx="263" cy="307" rx="174" ry="172" fill="#000000" opacity="0.35"/>
-  <circle cx="256" cy="256" r="204" fill="url(#rim)"/>
-  <circle cx="256" cy="256" r="184" fill="url(#face)"/>
-  <circle cx="256" cy="256" r="153" fill="none" stroke="#ffffff" stroke-opacity="0.22" stroke-width="6"/>
-  <circle cx="256" cy="256" r="184" fill="url(#shine)"/>
-  <g transform="translate(94,92) scale(13.5)">
+  <circle cx="256" cy="256" r="380" fill="url(#rim)"/>
+  <circle cx="256" cy="256" r="256" fill="url(#face)"/>
+  <circle cx="256" cy="256" r="213" fill="none" stroke="#ffffff" stroke-opacity="0.22" stroke-width="7"/>
+  <circle cx="256" cy="256" r="256" fill="url(#shine)"/>
+  <g transform="translate(57,52) scale(16.5)">
     <path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z" fill="#ffffff"/>
   </g>
 </svg>
