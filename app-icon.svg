@@ -1,10 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <defs>
-    <linearGradient id="rim" x1="90" y1="80" x2="422" y2="432" gradientUnits="userSpaceOnUse">
+    <linearGradient id="rim" x1="70" y1="60" x2="440" y2="450" gradientUnits="userSpaceOnUse">
       <stop offset="0" stop-color="#3f6fd6"/>
       <stop offset="1" stop-color="#2aa878"/>
     </linearGradient>
-    <linearGradient id="face" x1="90" y1="80" x2="422" y2="432" gradientUnits="userSpaceOnUse">
+    <linearGradient id="face" x1="70" y1="60" x2="440" y2="450" gradientUnits="userSpaceOnUse">
       <stop offset="0" stop-color="#5b8cff"/>
       <stop offset="1" stop-color="#3ecf8e"/>
     </linearGradient>
@@ -13,11 +13,12 @@
       <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
     </radialGradient>
   </defs>
-  <rect width="512" height="512" rx="112" fill="#0f1115"/>
-  <ellipse cx="262" cy="300" rx="150" ry="148" fill="#000000" opacity="0.35"/>
-  <circle cx="256" cy="256" r="176" fill="url(#rim)"/>
-  <circle cx="256" cy="256" r="158" fill="url(#face)"/>
-  <circle cx="256" cy="256" r="132" fill="none" stroke="#ffffff" stroke-opacity="0.22" stroke-width="5"/>
-  <circle cx="256" cy="256" r="158" fill="url(#shine)"/>
-  <text x="256" y="269" font-family="'Arial Rounded MT Bold', Arial, sans-serif" font-weight="700" font-size="200" fill="#ffffff" text-anchor="middle" dominant-baseline="middle">&#8364;</text>
+  <rect width="512" height="512" fill="#0f1115"/>
+  <ellipse cx="263" cy="307" rx="174" ry="172" fill="#000000" opacity="0.35"/>
+  <circle cx="256" cy="256" r="204" fill="url(#rim)"/>
+  <circle cx="256" cy="256" r="184" fill="url(#face)"/>
+  <circle cx="256" cy="256" r="153" fill="none" stroke="#ffffff" stroke-opacity="0.22" stroke-width="6"/>
+  <circle cx="256" cy="256" r="184" fill="url(#shine)"/>
+  <polyline points="130,330 196,272 238,308 308,216 346,190" fill="none" stroke="#ffffff" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/>
+  <polygon points="374,171 360,210 332,170" fill="#ffffff"/>
 </svg>
