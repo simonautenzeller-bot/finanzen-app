@@ -1,13 +1,23 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <defs>
-    <linearGradient id="coin" x1="90" y1="80" x2="422" y2="432" gradientUnits="userSpaceOnUse">
+    <linearGradient id="rim" x1="90" y1="80" x2="422" y2="432" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#3f6fd6"/>
+      <stop offset="1" stop-color="#2aa878"/>
+    </linearGradient>
+    <linearGradient id="face" x1="90" y1="80" x2="422" y2="432" gradientUnits="userSpaceOnUse">
       <stop offset="0" stop-color="#5b8cff"/>
       <stop offset="1" stop-color="#3ecf8e"/>
     </linearGradient>
+    <radialGradient id="shine" cx="0.35" cy="0.3" r="0.55">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.35"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
   </defs>
   <rect width="512" height="512" rx="112" fill="#0f1115"/>
-  <circle cx="256" cy="256" r="176" fill="url(#coin)"/>
-  <path d="M349,171 A 133,133 0 1 0 349,341" fill="none" stroke="#ffffff" stroke-width="42" stroke-linecap="round"/>
-  <line x1="176" y1="226" x2="322" y2="226" stroke="#ffffff" stroke-width="34" stroke-linecap="round"/>
-  <line x1="176" y1="288" x2="322" y2="288" stroke="#ffffff" stroke-width="34" stroke-linecap="round"/>
+  <ellipse cx="262" cy="300" rx="150" ry="148" fill="#000000" opacity="0.35"/>
+  <circle cx="256" cy="256" r="176" fill="url(#rim)"/>
+  <circle cx="256" cy="256" r="158" fill="url(#face)"/>
+  <circle cx="256" cy="256" r="132" fill="none" stroke="#ffffff" stroke-opacity="0.22" stroke-width="5"/>
+  <circle cx="256" cy="256" r="158" fill="url(#shine)"/>
+  <text x="256" y="269" font-family="'Arial Rounded MT Bold', Arial, sans-serif" font-weight="700" font-size="200" fill="#ffffff" text-anchor="middle" dominant-baseline="middle">&#8364;</text>
 </svg>
