@@ -12,11 +12,16 @@ const OWNERS = ["ich", "partner"];
 const Store = {
   state: null,
 
+  // true, wenn keine gespeicherten Daten gefunden wurden (Erststart oder Browser-Speicher geleert)
+  wasFresh: false,
+
   load() {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
+      this.wasFresh = !raw;
       this.state = raw ? this.migrate(JSON.parse(raw)) : structuredClone(SEED_DATA);
     } catch {
+      this.wasFresh = true;
       this.state = structuredClone(SEED_DATA);
     }
     return this.state;

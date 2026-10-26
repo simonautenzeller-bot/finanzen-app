@@ -22,6 +22,22 @@
   --cat-assets: #2dd4bf;
 }
 
+:root {
+  --ab-card: var(--bg-soft);
+  --ab-text: var(--text);
+  --ab-muted: var(--muted);
+  --ab-border: var(--line-strong);
+  --ab-accent: var(--accent);
+  --ab-accent-text: var(--accent-text);
+  --ab-warn: var(--cat-planned);
+  --ab-radius: 10px;
+  --ab-input: var(--bg-input);
+}
+
+.ab-banner { margin: 10px 12px 0; }
+.ab-actions .btn { align-self: stretch; }
+.ab-banner-actions .btn { align-self: auto; }
+
 :root[data-theme="light"] {
   --bg: #f5f7fa;
   --bg-soft: #ffffff;

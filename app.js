@@ -120,6 +120,8 @@ function render() {
   else if (ui.tab === "assets") viewEl.innerHTML = renderAssets(calc);
   else viewEl.innerHTML = renderData();
   if (openAccordions) restoreOpenBudgetAccordions(openAccordions);
+  const backupSlot = document.getElementById("backup-slot");
+  if (backupSlot) backupSlot.appendChild(AppBackup.createPanel());
 }
 
 function getOpenBudgetAccordions() {
@@ -462,6 +464,11 @@ function renderData() {
         </div>
         <p class="hint">Alles wird automatisch bei jeder Änderung lokal im Browser gespeichert
           (localStorage). Für Backups die JSON-Datei sichern.</p>
+      </div>
+
+      <div class="panel">
+        <h2 class="panel__title">Wochen-Backup</h2>
+        <div id="backup-slot"></div>
       </div>
           ${ui.demoMode ? `<div class="demo-banner">Demo-Modus ist aktiv. Es werden ausschließlich Beispieldaten angezeigt und keine echten Beträge.</div>` : ""}
     </div>`;
@@ -808,6 +815,7 @@ function exportJson() {
   a.download = `finanzen-${new Date().toISOString().slice(0, 10)}.json`;
   a.click();
   URL.revokeObjectURL(url);
+  AppBackup.markExternal("Export");
 }
 
 importFileEl.addEventListener("change", async () => {
@@ -817,6 +825,7 @@ importFileEl.addEventListener("change", async () => {
     Store.replace(JSON.parse(await file.text()));
     render();
     showStatus("Importiert");
+    AppBackup.markExternal("Wiederherstellung");
   } catch {
     alert("Die Datei konnte nicht gelesen werden.");
   }
@@ -824,4 +833,27 @@ importFileEl.addEventListener("change", async () => {
 });
 
 Store.load();
+AppBackup.init({
+  appId: "finanzen-app",
+  appName: "Finanzen",
+  filePrefix: "Finanzen",
+  getData: () => Store.state,
+  restore: (text) => {
+    let parsed;
+    try {
+      parsed = JSON.parse(text);
+    } catch {
+      return false;
+    }
+    if (!parsed || !Array.isArray(parsed.groups)) return false;
+    Store.replace(parsed);
+    render();
+    return true;
+  },
+  isFresh: () => Store.wasFresh,
+  bannerBefore: viewEl,
+  btnClass: "btn btn--ghost",
+  btnPrimaryClass: "btn",
+  inputClass: "input",
+});
 render();
